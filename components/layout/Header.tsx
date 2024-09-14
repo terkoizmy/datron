@@ -1,6 +1,7 @@
 // components/layout/Header.tsx
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import Image from 'next/image'
 
 import {
   NavigationMenu,
@@ -30,9 +31,9 @@ const routesPage = [
 export default function Header() {
   return (
     <header className="py-4 px-6 flex items-center justify-between w-full bg-transparent border-2 rounded-md border-slate-800 ">
-      <div className="flex items-center ">
+      <div className=" flex items-center justify-between ">
         <Link href="/" className="text-2xl font-bold text-red-600">
-          🏪 DaTron
+          <Image src="/images/datron-logo.svg" alt="DATRON Logo" width={50} height={50} />
         </Link>
       </div>
       <NavigationMenu >
