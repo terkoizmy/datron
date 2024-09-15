@@ -6,7 +6,11 @@ import { motion } from "framer-motion"
 import { loadSlim } from "@tsparticles/slim"
 import Particles, { initParticlesEngine } from "@tsparticles/react";
 
-export default function HeroSection() {
+interface HeroSectionProps {
+  isActive?: boolean;
+}
+
+export default function HeroSection({ isActive = false }: HeroSectionProps) {
   const [ init, setInit ] = useState(false);
 
   const particlesInit = useCallback(async (engine: any) => {
@@ -68,10 +72,10 @@ export default function HeroSection() {
           fpsLimit: 120,
           interactivity: {
             events: {
-              onClick: {
-                enable: true,
-                mode: "push",
-              },
+              // onClick: {
+              //   enable: true,
+              //   mode: "push",
+              // },
               onHover: {
                 enable: true,
                 mode: "repulse",
@@ -133,7 +137,7 @@ export default function HeroSection() {
       />
       
       {/* Content wrapper */}
-      <div className="relative z-10 flex w-full items-center">
+      <div className="relative flex w-full items-center">
         {/* Left side - Text content */}
         <motion.div 
           className="w-1/2 p-12"
@@ -141,9 +145,9 @@ export default function HeroSection() {
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.8 }}
         >
-          <h1 className="text-5xl font-bold mb-6 text-white leading-tight">
+          <h1 className="text-2xl sm:text-5xl font-bold mb-6 text-white leading-tight">
             Datron marketplace for 
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-pink-500">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-pink-500 ">
               {" "}AI developers
             </span>
             {" "}and businesses
