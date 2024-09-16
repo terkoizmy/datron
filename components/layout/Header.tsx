@@ -1,17 +1,20 @@
-// components/layout/Header.jsx
+"use client"
+
 import { useState, useEffect } from 'react'
 import { motion } from "framer-motion"
 import Image from 'next/image'
-import { Button } from "@/components/ui/button"
 import TronLinkAuth from '@/components/auth/TronLinkAuth'
+import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 
 const routesPage = [
-  { label: "Home", href: "0" },
-  { label: "Marketplace", href: "2" },
+  { label: "Home", href: "/", link: "/" },
+  { label: "Marketplace", href: "/marketplace", link: "/marketplace" },
 ]
 
-export default function Header({ activeSection, setActiveSection }: any) {
+export default function Header({ activeSection }: { activeSection?: string }) {
   const [scrolled, setScrolled] = useState(false)
+  const router = useRouter()
 
   useEffect(() => {
     const handleScroll = () => {
@@ -21,45 +24,39 @@ export default function Header({ activeSection, setActiveSection }: any) {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  const handleNavClick = (e: any, href: any) => {
-    e.preventDefault();
-    setActiveSection(Number(href));
-  }
-
-  console.log(activeSection)
-
   return (
     <motion.header 
-      className={`fixed top-0 left-0 right-0 py-4 px-6 flex items-center justify-between transition-all duration-300 ${
-        scrolled ? 'bg-blue-900 bg-opacity-80 backdrop-filter backdrop-blur-lg' : 'bg-transparent'
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        scrolled ? 'bg-blue-800 shadow-md' : 'bg-transparent'
       }`}
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       transition={{ duration: 0.5 }}
     >
-      <a onClick={(e) => handleNavClick(e, "0")} className="flex items-center cursor-pointer">
-        <Image src="/images/datron-logo.svg" alt="DATRON Logo" width={40} height={40} />
-        {/* <span className="ml-2 text-xl font-bold text-white">Datron</span> */}
-      </a>
+      <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+        <Link href="/" className="flex items-center space-x-2">
+          <Image src="/images/datron-logo.svg" alt="DATRON Logo" width={40} height={40} />
+          <span className="text-xl font-bold text-white">Datron</span>
+        </Link>
 
-      <nav className="hidden md:flex space-x-6">
-        {routesPage.map((route, index) => (
-          <a 
-            key={index} 
-            onClick={(e) => handleNavClick(e, route.href)}
-            className={`text-white transition-colors duration-200 cursor-pointer ${
-              activeSection === Number(route.href) ? 'text-red-400' : 'hover:text-red-400'
-            }`}
-          >
-            {route.label}
-          </a>
-        ))}
-      </nav>
+        <nav className="hidden md:flex space-x-6">
+          {routesPage.map((route) => (
+            <Link 
+              key={route.href} 
+              href={route.link}
+              className={`text-white transition-colors duration-200 hover:text-blue-300 ${
+                activeSection === route.href ? 'font-semibold' : ''
+              }`}
+            >
+              {route.label}
+            </Link>
+          ))}
+        </nav>
 
-      <div className="flex items-center space-x-4">
-        <TronLinkAuth />
+        <div className="flex items-center space-x-4">
+          <TronLinkAuth />
+        </div>
       </div>
-
     </motion.header>
   )
 }
