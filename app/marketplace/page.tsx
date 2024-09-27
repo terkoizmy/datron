@@ -7,6 +7,5 @@ export default function Marketplace() {
     <div>
       <MarketplacePage />
     </div>
-
   )
 }

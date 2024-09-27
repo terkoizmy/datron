@@ -48,10 +48,6 @@ export default function HeroSection({ isActive = false }: HeroSectionProps) {
       });
   }, []);
 
-  const particlesLoaded = (container: any) => {
-    console.log(container);
-};
-
   return (
     <section className="relative h-screen flex bg-gradient-to-br from-blue-900 to-purple-900 overflow-hidden">
       {/* Background effect */}

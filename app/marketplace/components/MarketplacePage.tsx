@@ -1,9 +1,11 @@
 "use client"
 
 import React, { useState, useEffect, useMemo } from 'react';
+import { useQuery } from 'react-query';
 import { Search, Grid, List } from 'lucide-react';
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Skeleton } from "@/components/ui/skeleton"
 import {
   Select,
   SelectContent,
@@ -20,24 +22,11 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination"
-
-// Mock data for datasets
-const mockDatasets = [
-  { id: 1, title: "Large Language Model Dataset", category: "NLP", size: "500GB", price: 1000, rating: 4.5 },
-  { id: 2, title: "Image Classification Dataset", category: "Computer Vision", size: "200GB", price: 750, rating: 4.2 },
-  { id: 3, title: "Sentiment Analysis Dataset", category: "NLP", size: "50GB", price: 500, rating: 4.8 },
-  { id: 4, title: "Object Detection Dataset", category: "Computer Vision", size: "300GB", price: 900, rating: 4.6 },
-  { id: 5, title: "Time Series Forecasting Dataset", category: "Time Series", size: "100GB", price: 600, rating: 4.3 },
-  { id: 6, title: "Speech Recognition Dataset", category: "Audio", size: "400GB", price: 1200, rating: 4.7 },
-  { id: 7, title: "Small Language Model Dataset", category: "NLP", size: "500GB", price: 1000, rating: 4.5 },
-  { id: 8, title: "Image Detection Dataset", category: "Computer Vision", size: "200GB", price: 750, rating: 4.2 },
-  { id: 9, title: "Fraud Detection Dataset", category: "NLP", size: "50GB", price: 500, rating: 4.8 },
-  { id: 10, title: "animal Detection Dataset", category: "Computer Vision", size: "300GB", price: 900, rating: 4.6 },
-  { id: 11, title: "Value Market Dataset", category: "Time Series", size: "100GB", price: 600, rating: 4.3 },
-  { id: 12, title: "Animal Recognition Dataset", category: "Audio", size: "400GB", price: 1200, rating: 4.7 },
-  // Add more mock data to test pagination
-  // ...
-];
+import { DatasetListingDialog } from './DatasetListingDialog';
+import { useTronWeb } from '@/hooks/useTronWeb';
+import { getAllDatasets } from '@/utils/tronContract';
+import { useAuth } from '@/lib/AuthContext'
+import Link from 'next/link';
 
 const ITEMS_PER_PAGE = 6;
 
@@ -46,14 +35,23 @@ const MarketplacePage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [currentPage, setCurrentPage] = useState(1);
+  const { tronWeb } = useTronWeb();
+
+  const { data: datasets, isLoading, error } = useQuery(
+    'datasets',
+    () => tronWeb ? getAllDatasets(tronWeb) : null,
+    { enabled: !!tronWeb }
+  );
 
   // Filter datasets based on search term and category
   const filteredDatasets = useMemo(() => {
-    return mockDatasets.filter(dataset => 
+    if (!datasets) return [];
+    // @ts-ignore
+    return datasets.filter(dataset => 
       dataset.title.toLowerCase().includes(searchTerm.toLowerCase()) &&
       (selectedCategory === 'All' || dataset.category === selectedCategory)
     );
-  }, [searchTerm, selectedCategory]);
+  }, [datasets, searchTerm, selectedCategory]);
 
   // Calculate pagination
   const pageCount = Math.ceil(filteredDatasets.length / ITEMS_PER_PAGE);
@@ -67,10 +65,16 @@ const MarketplacePage = () => {
     setCurrentPage(1);
   }, [searchTerm, selectedCategory]);
 
+  // if (isLoading) return <div className="text-center mt-8">Loading datasets...</div>;
+  // // @ts-ignore
+  // if (error) return <div className="text-center mt-8 text-red-500">Error loading datasets: {error.message}</div>;
+
   return (
     <div className="min-h-screen flex flex-col bg-blue-50">
       <main className="flex-grow container mx-auto px-4 py-8 pt-24">
         <h1 className="text-3xl font-bold mb-8 text-center text-blue-900">AI Training Datasets Marketplace</h1>
+        {/* <BTFSTest /> */}
+        {/* <BTFSOperations /> */}
         
         {/* Search and Filter Section */}
         <div className="flex flex-col md:flex-row justify-between items-center mb-8 space-y-4 md:space-y-0 md:space-x-4">
@@ -119,29 +123,38 @@ const MarketplacePage = () => {
               </Button>
             </div>
           </div>
+          <DatasetListingDialog />
         </div>
 
         {/* Dataset Grid/List */}
         <div className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'}`}>
-          {currentDatasets.map(dataset => (
-            <Card key={dataset.id} className="bg-white shadow-md hover:shadow-lg transition-shadow duration-300 border border-blue-200">
-              <CardHeader>
-                <CardTitle className="text-xl font-semibold text-blue-900">{dataset.title}</CardTitle>
-                <CardDescription className="text-blue-600">{dataset.category}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-blue-700">Size: {dataset.size}</p>
-                <p className="text-sm text-blue-700">Rating: {dataset.rating}/5</p>
-              </CardContent>
-              <CardFooter className="flex justify-between items-center">
-                <span className="text-lg font-bold text-blue-900">{dataset.price} TRX</span>
-                <Button className="bg-blue-600 hover:bg-blue-700 text-white">Purchase</Button>
-              </CardFooter>
-            </Card>
-          ))}
+          
+          {!isLoading ? // @ts-ignore
+          currentDatasets.map(dataset => (
+            <Link key={dataset.id} href={`http://localhost:3000/marketplace/${dataset.id}`}>
+              <Card key={dataset.id} className="bg-white shadow-md hover:shadow-lg transition-shadow duration-300 border border-blue-200">
+                <CardHeader>
+                  <CardTitle className="text-xl font-semibold text-blue-900">{dataset.title}</CardTitle>
+                  <CardDescription className="text-blue-600">{dataset.category}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-blue-700">Size: {dataset.size}</p>
+                  <p className="text-sm text-blue-700">Owner: {dataset.owner.slice(0, 6)}...{dataset.owner.slice(-4)}</p>
+                </CardContent>
+                <CardFooter className="flex justify-between items-center">
+                  <span className="text-lg font-bold text-blue-900">{dataset.price} TRX</span>
+                  <Button className="bg-blue-600 hover:bg-blue-700 text-white z-50">Purchase</Button>
+                </CardFooter>
+              </Card>
+            </Link>
+          ))
+        : 
+        <div>
+          <Skeleton className="h-[125px] w-[250px] rounded-xl" />
         </div>
-
-        {filteredDatasets.length === 0 && (
+        }
+        </div>
+        {filteredDatasets.length === 0 && !isLoading && (
           <p className="text-center text-blue-500 mt-8">No datasets found matching your criteria.</p>
         )}
 
@@ -177,7 +190,8 @@ const MarketplacePage = () => {
             </Pagination>
           </div>
         )}
-      </main>    </div>
+      </main>
+    </div>
   );
 };
 

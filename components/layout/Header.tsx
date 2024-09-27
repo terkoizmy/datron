@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { useState, useEffect } from 'react'
 import { motion } from "framer-motion"
@@ -6,6 +6,7 @@ import Image from 'next/image'
 import TronLinkAuth from '@/components/auth/TronLinkAuth'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { useAuth } from '@/lib/AuthContext'
 
 const routesPage = [
   { label: "Home", href: "/", link: "/" },
@@ -15,6 +16,7 @@ const routesPage = [
 export default function Header({ activeSection }: { activeSection?: string }) {
   const [scrolled, setScrolled] = useState(false)
   const router = useRouter()
+  const { isAuthenticated } = useAuth()
 
   useEffect(() => {
     const handleScroll = () => {
@@ -51,6 +53,14 @@ export default function Header({ activeSection }: { activeSection?: string }) {
               {route.label}
             </Link>
           ))}
+          {isAuthenticated && (
+            <Link 
+              href="/profile"
+              className="text-white transition-colors duration-200 hover:text-blue-300"
+            >
+              Profile
+            </Link>
+          )}
         </nav>
 
         <div className="flex items-center space-x-4">
